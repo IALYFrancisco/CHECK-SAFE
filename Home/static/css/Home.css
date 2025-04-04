@@ -1,0 +1,100 @@
+@font-face {
+    font-family: Poppins;
+    src: url('../font/Poppins-Regular.ttf');
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Poppins;
+    color: #444;
+}
+
+body {
+    width: 100%;
+}
+
+.app-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 100px auto;
+    display: flex;
+}
+
+.operation {
+    width: 50%;
+    height: inherit;
+    border-right: 1px #999 solid;
+    height: 300px;
+}
+
+.operation form {
+    margin-top: 20px;
+}
+
+.operation label {
+    font-size: 14px;
+}
+
+.operation input {
+    margin-top: 10px;
+}
+
+.operation button {
+    display: block;
+    padding: 8px 15px;
+    font-size: 12px;
+    margin-top: 15px;
+    background-color: green;
+    border: none;
+    color: white;
+    border-radius: 3px;
+}
+
+.operation .results {
+    margin-top: 30px;
+}
+
+.operation span {
+    font-size: 14px;
+    padding: 2px 10px;
+    border-radius: 50px;
+    margin: 0 5px;
+    color: white;
+}
+
+.operation .safe {
+    border: 1px solid green;
+    background-color: rgb(147, 255, 147);
+    color: black;
+}
+
+.operation .warning {
+    color: black;
+    animation: fire infinite linear .9s;
+}
+
+.result {
+    width: 50%;
+    height: inherit;
+}
+
+@keyframes fire {
+    0% {
+        background-color: rgb(255, 142, 142);
+        border: 1px solid red;
+    }
+    50% {
+        background-color: rgb(255, 142, 142);
+        border: 1px solid red;
+    }
+    51% {
+        background-color: white;
+        border: 1px solid transparent;
+    }
+    100% {
+        background-color: white;
+        border: 1px solid transparent;
+    }
+}

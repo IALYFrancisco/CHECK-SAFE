@@ -1,11 +1,37 @@
+{%load static%}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <link rel="stylesheet" href="{% static 'css/Home.css' %}">
+    <link rel="shortcut icon" href="{% static 'img/icons8-secure-32.png' %}" type="image/x-icon">
+    <title>Fraud detection</title>
 </head>
 <body>
-    <h1>This is the homepage of our application 😁</h1>
+    <header>
+        <nav>
+            <div class="logo-container">
+                <img src="{% static 'img/icons8-secure-32.png' %}" alt="Logo de l'application" title="Logo de l'application">
+            </div>
+        </nav>
+    </header>
+    <main class="app-container">
+        <section class="operation">
+            <h2>Fraud detection</h2>
+            <form action="" method="post">
+                {% csrf_token %}
+                <label for="file">Import a csv file :</label>
+                <input type="file" name="file" id="file">
+                <button>start scan</button>
+            </form>
+            <section class="results">
+                <h4>Scan results:</h4>
+                <span class="safe">22</span>
+                <span class="warning">3</span>
+            </section>
+        </section>
+        <section class="result"></section>
+    </main>
 </body>
 </html>
