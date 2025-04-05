@@ -15,6 +15,21 @@ body {
     width: 100%;
 }
 
+header {
+    width: 100%;
+    max-width: 800px;
+    margin: auto;
+    height: 70px;
+    display: flex;
+    align-items: center;
+}
+
+header .logo-container {
+    display: flex;
+    align-items: center;
+    column-gap: 5px;
+}
+
 .app-container {
     width: 100%;
     max-width: 800px;
