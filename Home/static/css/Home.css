@@ -95,6 +95,9 @@ header .logo-container {
     height: inherit;
 }
 
+.result h5 {
+    text-align: center;
+}
 @keyframes fire {
     0% {
         background-color: rgb(255, 142, 142);
