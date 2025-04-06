@@ -3,7 +3,7 @@ from django.shortcuts import render
 from .forms import UploadCSVForm
 from django.db import connection
 
-FRAUD_AMOUNT_THRESHOLD = 1000.0  # seuil pour une fraude par montant
+FRAUD_AMOUNT_THRESHOLD = 10000.0
 
 def index(request):
     if request.method == 'POST':
