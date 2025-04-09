@@ -1,4 +1,4 @@
-{%load static%}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'css/Home.css' %}">
     <link rel="shortcut icon" href="{% static 'img/icons8-secure-32.png' %}" type="image/x-icon">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <title>Check safe</title>
 </head>
 <body>
@@ -22,101 +23,90 @@
             <h2>Fraud detection</h2>
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
-                <!-- <label for="file">Import a csv file :</label> -->
-                <!-- <input type="file" name="file" id="file" required> -->
                 {{ form.as_p }}
-                <button>start scan</button>
+                <button>Start scan</button>
             </form>
-            <section class="results">
-                <h4>Scan results:</h4>
-                <span class="safe">5</span>
-                <span class="warning">3</span>
-            </section>
         </section>
         <section class="result">
-            <!-- <h5>No results, start scan</h5> -->
-             <section class="user-list">
-                <div class="user safe">
-                    <div class="profile-container">
-                        <img src="{% static 'img/profile2.jpg' %}" alt="">
-                    </div>
-                    <div class="user-info">
-                        <p class="name">Isabelle Montier</p>
-                        <p class="account-id">fyzef-sd67-ydgze-mJfh</p>
-                        <p class="town">New York</p>
-                    </div>
-                </div>
-                <div class="user safe">
-                    <div class="profile-container">
-                        <img src="{% static 'img/profile2.jpg' %}" alt="">
-                    </div>
-                    <div class="user-info">
-                        <p class="name">Isabelle Montier</p>
-                        <p class="account-id">fyzef-sd67-ydgze-mJfh</p>
-                        <p class="town">New York</p>
-                    </div>
-                </div>
-                <div class="user not-safe">
-                    <div class="profile-container">
-                        <img src="{% static 'img/doctor-pdp.png' %}" alt="">
-                    </div>
-                    <div class="user-info">
-                        <p class="name">Randria Mickaêl</p>
-                        <p class="account-id">fyzef-sd67-djnf-mJfh</p>
-                        <p class="town">Toliary, Madagascar</p>
-                    </div>
-                </div>
-                <div class="user not-safe">
-                    <div class="profile-container">
-                        <img src="{% static 'img/doctor-pdp.png' %}" alt="">
-                    </div>
-                    <div class="user-info">
-                        <p class="name">Randria Mickaêl</p>
-                        <p class="account-id">fyzef-sd67-djnf-mJfh</p>
-                        <p class="town">Toliary, Madagascar</p>
-                    </div>
-                </div>
-                <div class="user safe">
-                    <div class="profile-container">
-                        <img src="{% static 'img/profile2.jpg' %}" alt="">
-                    </div>
-                    <div class="user-info">
-                        <p class="name">Isabelle Montier</p>
-                        <p class="account-id">fyzef-sd67-ydgze-mJfh</p>
-                        <p class="town">New York</p>
-                    </div>
-                </div><div class="user safe">
-                    <div class="profile-container">
-                        <img src="{% static 'img/profile2.jpg' %}" alt="">
-                    </div>
-                    <div class="user-info">
-                        <p class="name">Isabelle Montier</p>
-                        <p class="account-id">fyzef-sd67-ydgze-mJfh</p>
-                        <p class="town">New York</p>
-                    </div>
-                </div>
-                <div class="user safe">
-                    <div class="profile-container">
-                        <img src="{% static 'img/profile2.jpg' %}" alt="">
-                    </div>
-                    <div class="user-info">
-                        <p class="name">Isabelle Montier</p>
-                        <p class="account-id">fyzef-sd67-ydgze-mJfh</p>
-                        <p class="town">New York</p>
-                    </div>
-                </div>
-                <div class="user safe">
-                    <div class="profile-container">
-                        <img src="{% static 'img/profile2.jpg' %}" alt="">
-                    </div>
-                    <div class="user-info">
-                        <p class="name">Isabelle Montier</p>
-                        <p class="account-id">fyzef-sd67-ydgze-mJfh</p>
-                        <p class="town">New York</p>
-                    </div>
-                </div>
-             </section>
+            {% if transactions %}
+                <h4>Résultats du scan :</h4>
+                <section class="user-list">
+                    {% for transaction in transactions %}
+                        <div class="user {% if transaction.type_fraude == 'Aucune' %}safe{% else %}not-safe{% endif %}">
+                            <div class="profile-container">
+                                <img src="{% static 'img/profile2.jpg' %}" alt="">
+                            </div>
+                            <div class="user-info">
+                                <p class="name">{{ transaction.nom }}</p>
+                                <p class="account-id">Transaction #{{ transaction.transaction_id }}</p>
+                                <p class="town">{{ transaction.lieu_transaction }}</p>
+                                <p class="fraud-type">Type de fraude : {{ transaction.type_fraude }}</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </section>
+            {% else %}
+                <h5>Aucun résultat, veuillez lancer le scan.</h5>
+            {% endif %}
         </section>
     </main>
+    <section class="fraud-chart">
+        <h2>Fraudes par Date</h2>
+        <canvas id="fraudChart"></canvas>
+    </section>
+    <!-- Section pour les statistiques supplémentaires -->
+    <section class="statistics">
+        <h2>Statistiques des Transactions</h2>
+        <p>Total des transactions : {{ total_transactions }}</p>
+        <p>Nombre de fraudes détectées : {{ fraud_count }}</p>
+        <p>Pourcentage de fraudes : {{ fraud_count|floatformat:2 }}%</p>
+    </section>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var fraudData = JSON.parse('{{ fraud_dates|escapejs }}');
+            var labels = Object.keys(fraudData);
+            var data = Object.values(fraudData);
+    
+            var ctx = document.getElementById('fraudChart').getContext('2d');
+            var fraudChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Nombre de Fraudes',
+                        data: data,
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderWidth: 1,
+                        fill: true,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Nombre de Fraudes par Date'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Nombre de Fraudes'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>
