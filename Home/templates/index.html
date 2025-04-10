@@ -3,10 +3,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <title>Check safe</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'css/Home.css' %}">
     <link rel="shortcut icon" href="{% static 'img/icons8-secure-32.png' %}" type="image/x-icon">
-    <title>Check safe</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <header>
@@ -26,6 +27,28 @@
                 <button>Start scan</button>
             </form>
         </section>
+
+        {% if transactions %}
+        <section class="statistics">
+            <h3>📊 Statistiques du scan</h3>
+            <ul>
+                <li>Total transactions : {{ stats.total }}</li>
+                <li>Frauduleuses : {{ stats.fraudulent }}</li>
+                <li>Saines : {{ stats.safe }}</li>
+                <li>Pourcentage de fraude : {{ stats.fraud_percentage }}%</li>
+                <li>Montant total : {{ stats.total_amount }} €</li>
+                <li>Montant frauduleux : {{ stats.total_fraud_amount }} €</li>
+            </ul>
+        </section>
+
+        <section class="charts">
+            <canvas id="fraudByTypeChart"></canvas>
+            <canvas id="fraudByCityChart"></canvas>
+            <canvas id="topUsersChart"></canvas>
+            <canvas id="scanTrendChart"></canvas>
+        </section>
+        {% endif %}
+
         <section class="result">
             {% if transactions %}
                 <h4>Résultats du scan :</h4>
@@ -49,5 +72,76 @@
             {% endif %}
         </section>
     </main>
+
+    {% if stats %}
+    <script>
+        const fraudByType = JSON.parse('{{ stats.fraud_by_type|escapejs }}');
+        const fraudByCity = JSON.parse('{{ stats.fraud_by_city|escapejs }}');
+        const topFraudUsers = JSON.parse('{{ stats.top_fraud_users|escapejs }}');
+        const scanTrend = JSON.parse('{{ stats.scan_trend|escapejs }}');
+
+        new Chart(document.getElementById('fraudByTypeChart'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(fraudByType),
+                datasets: [{
+                    label: 'Types de fraude',
+                    data: Object.values(fraudByType),
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)'
+                }]
+            }
+        });
+
+        new Chart(document.getElementById('fraudByCityChart'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(fraudByCity),
+                datasets: [{
+                    label: 'Fraudes par ville',
+                    data: Object.values(fraudByCity),
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)'
+                }]
+            }
+        });
+
+        new Chart(document.getElementById('topUsersChart'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(topFraudUsers),
+                datasets: [{
+                    label: 'Utilisateurs à risque',
+                    data: Object.values(topFraudUsers),
+                    backgroundColor: 'rgba(255, 206, 86, 0.6)'
+                }]
+            }
+        });
+
+        new Chart(document.getElementById('scanTrendChart'), {
+            type: 'line',
+            data: {
+                labels: Object.keys(scanTrend),
+                datasets: [{
+                    label: 'Fraudes détectées par date',
+                    data: Object.values(scanTrend),
+                    fill: false,
+                    borderColor: '#FF5733',
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        title: { display: true, text: 'Date de scan' }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Nombre de fraudes' }
+                    }
+                }
+            }
+        });
+    </script>
+    {% endif %}
 </body>
 </html>
