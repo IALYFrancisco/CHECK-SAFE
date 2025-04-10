@@ -1,147 +1,132 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Check safe</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Safe - Détection de Fraude</title>
     <link rel="stylesheet" href="{% static 'css/Home.css' %}">
-    <link rel="shortcut icon" href="{% static 'img/icons8-secure-32.png' %}" type="image/x-icon">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <header>
-        <nav>
-            <div class="logo-container">
-                <img src="{% static 'img/icons8-secure-32.png' %}" alt="Logo de l'application" title="Logo de l'application">
-                <h4>Check safe</h4>
-            </div>
-        </nav>
-    </header>
-    <main class="app-container">
-        <section class="operation">
-            <h2>Fraud detection</h2>
-            <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <button>Start scan</button>
-            </form>
-        </section>
+<header>
+    <nav>
+        <div class="logo-container">
+            <img src="{% static 'img/icons8-secure-32.png' %}" alt="Logo de l'application">
+            <h4>Check safe</h4>
+        </div>
+    </nav>
+</header>
+<main class="app-container">
+    <section class="operation">
+        <h2>Fraud Detection</h2>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button>Start Scan</button>
+        </form>
+    </section>
 
+    <section class="result">
         {% if transactions %}
-        <section class="statistics">
-            <h3>📊 Statistiques du scan</h3>
-            <ul>
-                <li>Total transactions : {{ stats.total }}</li>
-                <li>Frauduleuses : {{ stats.fraudulent }}</li>
-                <li>Saines : {{ stats.safe }}</li>
-                <li>Pourcentage de fraude : {{ stats.fraud_percentage }}%</li>
-                <li>Montant total : {{ stats.total_amount }} €</li>
-                <li>Montant frauduleux : {{ stats.total_fraud_amount }} €</li>
-            </ul>
-        </section>
+            <h4>Résultats du scan :</h4>
 
-        <section class="charts">
-            <canvas id="fraudByTypeChart"></canvas>
-            <canvas id="fraudByCityChart"></canvas>
-            <canvas id="topUsersChart"></canvas>
-            <canvas id="scanTrendChart"></canvas>
-        </section>
-        {% endif %}
+            <!-- ✅ Graphiques -->
+            <section class="charts">
+                <canvas id="fraudTypeChart"></canvas>
+                <canvas id="safeVsFraudChart"></canvas>
+                <canvas id="amountChart"></canvas>
+                <canvas id="userRiskChart"></canvas>
+                <canvas id="fraudCityChart"></canvas>
+            </section>
 
-        <section class="result">
-            {% if transactions %}
-                <h4>Résultats du scan :</h4>
-                <section class="user-list">
-                    {% for transaction in transactions %}
-                        <div class="user {% if transaction.type_fraude == 'Aucune' %}safe{% else %}not-safe{% endif %}">
-                            <div class="profile-container">
-                                <img src="{% static 'img/profile2.jpg' %}" alt="">
-                            </div>
-                            <div class="user-info">
-                                <p class="name">{{ transaction.nom }}</p>
-                                <p class="account-id">Transaction #{{ transaction.transaction_id }}</p>
-                                <p class="town">{{ transaction.lieu_transaction }}</p>
-                                <p class="fraud-type">Type de fraude : {{ transaction.type_fraude }}</p>
-                            </div>
+            <!-- ✅ Liste des utilisateurs -->
+            <section class="user-list">
+                {% for transaction in transactions %}
+                    <div class="user {% if transaction.type_fraude == 'Aucune' %}safe{% else %}not-safe{% endif %}">
+                        <div class="profile-container">
+                            <img src="{% static 'img/profile2.jpg' %}" alt="">
                         </div>
-                    {% endfor %}
-                </section>
-            {% else %}
-                <h5>Aucun résultat, veuillez lancer le scan.</h5>
-            {% endif %}
-        </section>
-    </main>
+                        <div class="user-info">
+                            <p class="name">{{ transaction.nom }}</p>
+                            <p class="account-id">Transaction #{{ transaction.transaction_id }}</p>
+                            <p class="town">{{ transaction.lieu_transaction }}</p>
+                            <p class="fraud-type">Type de fraude : {{ transaction.type_fraude }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </section>
+        {% else %}
+            <h5>Aucun résultat, veuillez lancer le scan.</h5>
+        {% endif %}
+    </section>
+</main>
 
+<script>
     {% if stats %}
-    <script>
         const fraudByType = JSON.parse('{{ stats.fraud_by_type|escapejs }}');
-        const fraudByCity = JSON.parse('{{ stats.fraud_by_city|escapejs }}');
-        const topFraudUsers = JSON.parse('{{ stats.top_fraud_users|escapejs }}');
-        const scanTrend = JSON.parse('{{ stats.scan_trend|escapejs }}');
+        const userRisk = JSON.parse('{{ stats.top_fraud_users|escapejs }}');
+        const cityRisk = JSON.parse('{{ stats.fraud_by_city|escapejs }}');
 
-        new Chart(document.getElementById('fraudByTypeChart'), {
-            type: 'bar',
+        new Chart(document.getElementById('fraudTypeChart'), {
+            type: 'pie',
             data: {
                 labels: Object.keys(fraudByType),
                 datasets: [{
-                    label: 'Types de fraude',
+                    label: "Types de Fraude",
                     data: Object.values(fraudByType),
-                    backgroundColor: 'rgba(255, 99, 132, 0.6)'
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#7DCEA0']
                 }]
             }
         });
 
-        new Chart(document.getElementById('fraudByCityChart'), {
-            type: 'bar',
+        new Chart(document.getElementById('safeVsFraudChart'), {
+            type: 'doughnut',
             data: {
-                labels: Object.keys(fraudByCity),
+                labels: ["Frauduleuses", "Sûres"],
                 datasets: [{
-                    label: 'Fraudes par ville',
-                    data: Object.values(fraudByCity),
-                    backgroundColor: 'rgba(54, 162, 235, 0.6)'
+                    data: [{{ stats.fraudulent }}, {{ stats.safe }}],
+                    backgroundColor: ['#E74C3C', '#2ECC71']
                 }]
             }
         });
 
-        new Chart(document.getElementById('topUsersChart'), {
+        new Chart(document.getElementById('amountChart'), {
             type: 'bar',
             data: {
-                labels: Object.keys(topFraudUsers),
+                labels: ["Montant total", "Montant frauduleux"],
+                datasets: [{
+                    label: 'Montants (€)',
+                    data: [{{ stats.total_amount }}, {{ stats.total_fraud_amount }}],
+                    backgroundColor: ['#3498DB', '#E67E22']
+                }]
+            }
+        });
+
+        new Chart(document.getElementById('userRiskChart'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(userRisk),
                 datasets: [{
                     label: 'Utilisateurs à risque',
-                    data: Object.values(topFraudUsers),
-                    backgroundColor: 'rgba(255, 206, 86, 0.6)'
+                    data: Object.values(userRisk),
+                    backgroundColor: '#8E44AD'
                 }]
             }
         });
 
-        new Chart(document.getElementById('scanTrendChart'), {
-            type: 'line',
+        new Chart(document.getElementById('fraudCityChart'), {
+            type: 'bar',
             data: {
-                labels: Object.keys(scanTrend),
+                labels: Object.keys(cityRisk),
                 datasets: [{
-                    label: 'Fraudes détectées par date',
-                    data: Object.values(scanTrend),
-                    fill: false,
-                    borderColor: '#FF5733',
-                    tension: 0.3
+                    label: 'Fraudes par ville',
+                    data: Object.values(cityRisk),
+                    backgroundColor: '#1ABC9C'
                 }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    x: {
-                        title: { display: true, text: 'Date de scan' }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        title: { display: true, text: 'Nombre de fraudes' }
-                    }
-                }
             }
         });
-    </script>
     {% endif %}
+</script>
 </body>
 </html>
