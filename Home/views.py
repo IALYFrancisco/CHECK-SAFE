@@ -3,7 +3,6 @@ from .forms import UploadCSVForm
 from django.db import connection
 import pandas as pd
 import json
-from datetime import datetime
 
 FRAUD_AMOUNT_THRESHOLD = 10000.0
 
@@ -37,8 +36,6 @@ def index(request):
                     return ", ".join(types) if types else "Aucune"
 
                 merged_df['type_fraude'] = merged_df.apply(label_fraude, axis=1)
-                scan_date = datetime.now().strftime('%Y-%m-%d')
-                merged_df['scan_date'] = scan_date
 
                 transactions = merged_df.to_dict('records')
 
@@ -55,10 +52,6 @@ def index(request):
                 top_fraud_users = fraud_transactions['nom'].value_counts().head(5).to_dict()
                 fraud_by_city = fraud_transactions['lieu_transaction'].value_counts().head(5).to_dict()
 
-                scan_trend = merged_df.groupby('scan_date').apply(
-                    lambda g: (g['type_fraude'] != 'Aucune').sum()
-                ).to_dict()
-
                 stats = {
                     'total': total_transactions,
                     'fraudulent': fraud_count,
@@ -69,7 +62,6 @@ def index(request):
                     'fraud_by_type': json.dumps(fraud_by_type),
                     'top_fraud_users': json.dumps(top_fraud_users),
                     'fraud_by_city': json.dumps(fraud_by_city),
-                    'scan_trend': json.dumps(scan_trend),
                 }
 
             except Exception as e:
