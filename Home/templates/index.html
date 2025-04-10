@@ -30,16 +30,6 @@
     <section class="result">
         {% if transactions %}
             <h4>Résultats du scan :</h4>
-
-            <!-- ✅ Graphiques -->
-            <section class="charts">
-                <canvas id="fraudTypeChart"></canvas>
-                <canvas id="safeVsFraudChart"></canvas>
-                <canvas id="amountChart"></canvas>
-                <canvas id="userRiskChart"></canvas>
-                <canvas id="fraudCityChart"></canvas>
-            </section>
-
             <!-- ✅ Liste des utilisateurs -->
             <section class="user-list">
                 {% for transaction in transactions %}
@@ -60,6 +50,30 @@
             <h5>Aucun résultat, veuillez lancer le scan.</h5>
         {% endif %}
     </section>
+</main>
+<main class="statistic-section">
+    {% if transactions %}
+            <!-- ✅ Graphiques -->
+            <section class="charts">
+                <div class="chart-container">
+                    <canvas id="fraudTypeChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="safeVsFraudChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="amountChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="userRiskChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="fraudCityChart"></canvas>
+                </div>
+            </section>
+        {% else %}
+            <h5>Aucun résultat, veuillez lancer le scan.</h5>
+        {% endif %}
 </main>
 
 <script>
